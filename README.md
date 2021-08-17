@@ -1,2 +1,2 @@
-# ShenNongTea
-神农茶子项目
+# TeaMiniProgram
+神农茶微信小程序
