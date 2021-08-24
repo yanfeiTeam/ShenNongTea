@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+teashop-server/config/config.js
+teashop-server/static/images
+teashop-server/static/videos
