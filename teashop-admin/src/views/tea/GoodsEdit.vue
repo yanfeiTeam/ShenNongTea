@@ -262,7 +262,7 @@
       goBack() {
         var that = this;
         that.$router.go(-1);
-      },
+      }, 
 
       async submitForm(formName) {
         const that = this;
