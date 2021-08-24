@@ -322,6 +322,29 @@
         return isJPG && isLt2M;
       },
 
+      // 表单提交 上传轮播图
+      async submitGoodsImgForm(formName) {
+        const that = this;
+        that.$refs[formName].validate(async (valid) => {
+          if (valid) {
+            // 验证通过 
+            if(that.$data.ruleForm.id){
+              await that.$http.post('updateTeaGoodsImg', that.ruleForm);
+            }else{
+              await that.$http.post('createTeaGoodsImg', that.ruleForm);
+            }
+            that.$message({
+              type: 'success',
+              message: '保存成功'
+            })
+            // 操作下一步
+            that.$data.stepsActive = 1
+          } else {
+            return false;
+          }
+        })
+      },
+
       // 上传 照片墙
       handleRemove(file, fileList) {
         console.log(file, fileList);
