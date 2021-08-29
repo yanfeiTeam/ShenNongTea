@@ -26,14 +26,14 @@
             <el-submenu index="2">
                 <template slot="title"><i class="el-icon-menu"></i>福利卡管理</template>
                 <el-menu-item-group title="神农茶票">
-                  <el-menu-item index="2-1">神农茶票初始化</el-menu-item>
-                  <el-menu-item index="2-2">神农茶票列表</el-menu-item>
+                  <el-menu-item index="/cardCustomers/list">客户批次管理</el-menu-item>
+                  <el-menu-item index="2-2">已售茶票管理</el-menu-item>
                 </el-menu-item-group>
-                <el-menu-item-group title="活动卡">
-                  <el-menu-item index="2-3">活动茶票卡列表</el-menu-item>
+                <el-menu-item-group title="活动茶票">
+                  <el-menu-item index="/cardActivities/list">活动茶票列表</el-menu-item>
                 </el-menu-item-group>
-                <el-menu-item-group title="礼包卡">
-                  <el-menu-item index="2-4">礼包茶票卡列表</el-menu-item>
+                <el-menu-item-group title="礼包管理">
+                  <el-menu-item index="2-4">礼包列表</el-menu-item>
                 </el-menu-item-group>
             </el-submenu>
             <el-submenu index="3">
@@ -47,7 +47,7 @@
                 <template slot="title"><i class="el-icon-menu"></i>商品管理</template>
                 <el-menu-item-group title="茶商品">
                   <el-menu-item index="/teaGoods/list">商品列表</el-menu-item>
-                  <el-menu-item index="/teaGoods/create">商品编辑</el-menu-item>
+                  <el-menu-item index="/teaGoods/create/id=''">商品编辑</el-menu-item>
                 </el-menu-item-group>
                 <el-menu-item-group title="六大茶系">
                   <el-menu-item index="/teaCategory/list">茶系列表</el-menu-item>

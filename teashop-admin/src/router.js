@@ -18,6 +18,14 @@ import CategoryList from './views/tea/CategoryList.vue'
 import TypesEdit from './views/tea/TypesEdit.vue'
 import TypesList from './views/tea/TypesList.vue'
 
+import CustomersEdit from './views/card/CustomersEdit.vue'
+import CustomersList from './views/card/CustomersList.vue'
+import BatchEdit from './views/card/BatchEdit.vue'
+import BatchList from './views/card/BatchList.vue'
+import BatchImport from './views/card/BatchImport.vue'
+import ActivitiesEdit from './views/card/ActivitiesEdit.vue'
+import ActivitiesList from './views/card/ActivitiesList.vue'
+
 Vue.use(Router)
 
 export default new Router({
@@ -40,6 +48,14 @@ export default new Router({
         {path: '/teaCategory/list', component: CategoryList },
         {path: '/teaTypes/create', component: TypesEdit },
         {path: '/teaTypes/list', component: TypesList },
+
+        {path: '/cardCustomers/create', component: CustomersEdit },
+        {path: '/cardCustomers/list', component: CustomersList },
+        {path: '/cardBatch/create/:cid/:bid', component: BatchEdit },
+        {path: '/cardBatch/list/:cid', component: BatchList },
+        {path: '/cardBatch/import/:cid/:bid', component: BatchImport },
+        {path: '/cardActivities/create', component: ActivitiesEdit },
+        {path: '/cardActivities/list', component: ActivitiesList },
       ]
     },
     {

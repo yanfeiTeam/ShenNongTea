@@ -15,7 +15,7 @@ let addData = (req, res) => {
         // 如果读取成功
         // 声明图片名字为时间戳和随机数拼接成的，尽量确保唯一性
         let time = 
-            moment().utc().format('YYYYMMDDhhmmss') +
+            moment().utc().format('YYYYMMDDhh') +
             parseInt(Math.random() * 999) + 
             parseInt(Math.random() * 2222);
         // 拓展名

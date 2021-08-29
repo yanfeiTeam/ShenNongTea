@@ -1,13 +1,13 @@
 <template>
-    <div class="sysUserEdit">
-      <el-page-header v-on:back="goBack()" content="新增品牌供货商" style="padding-bottom:30px;"></el-page-header>
+    <div class="customersEdit">
+      <el-page-header v-on:back="goBack()" content="新增客户" style="padding-bottom:30px;"></el-page-header>
       <el-tabs type="border-card">
-        <el-tab-pane label="填写品牌信息">
+        <el-tab-pane label="填写客户信息">
           <el-form v-bind:model="ruleForm" v-bind:rules="rules" ref="ruleForm" label-width="100px" style="width:96%;padding:30px 0;">
-          <el-form-item label="品牌名称" prop="name">
+          <el-form-item label="客户名称" prop="name">
               <el-input v-model="ruleForm.name"></el-input>
           </el-form-item>
-          <el-form-item label="品牌Logo" prop="image_path">
+          <el-form-item label="客户Logo" prop="imagePath">
               <el-upload
                 class="avatar-uploader"
                 action="http://localhost:3000/admin/api/upload/img"
@@ -18,16 +18,7 @@
                 <i v-else class="el-icon-plus avatar-uploader-icon"></i>
               </el-upload>
           </el-form-item>
-          <el-form-item label="电 话" prop="phone">
-              <el-input v-model.number="ruleForm.phone" maxlength="11"></el-input>
-          </el-form-item>
-          <el-form-item label="邮 箱" prop="email">
-              <el-input v-model="ruleForm.email" type="email"></el-input>
-          </el-form-item>
-          <el-form-item label="排 序" prop="sort">
-              <el-input v-model.number="ruleForm.sort" type="number"></el-input>
-          </el-form-item>
-          <el-form-item label="宣传视频" prop="video">
+          <el-form-item label="客户视频" prop="videoPath">
               <el-upload
                 class="upload-demo"
                 drag
@@ -43,11 +34,11 @@
                     rows="2"
                     placeholder="请输入内容"
                     v-model="ruleForm.introduction">
-                  </el-input>
+              </el-input>
           </el-form-item>
           <el-form-item>
-              <el-button type="primary"  v-on:click="submitForm('ruleForm')">立即创建</el-button>
-              <el-button type="morenbt"  v-on:click="resetForm('ruleForm')">重置</el-button>
+              <el-button type="primary" v-on:click="submitForm('ruleForm')">立即创建</el-button>
+              <el-button type="morenbt" v-on:click="resetForm('ruleForm')">重置</el-button>
           </el-form-item>
           </el-form>
         </el-tab-pane>
@@ -62,27 +53,14 @@
         ruleForm: {
           name: '',
           imagePath: '',
-          phone: null,
-          email: '',
-          sort: 1,
-          video: '',
+          videoPath: '',
           introduction: ''
         },
         rules: {
           name: [
-            { required: true, message: '请输入品牌名称', trigger: 'blur' }
-          ],
-          phone: [
-            { type: 'number', message: '请输入正确手机号', min: 1000000, max: 99999999999 }
-          ],
-          email: [
-            { type: 'email', message: '请输入正确邮箱地址', trigger: ['blur', 'change'] }
-          ],
-          sort: [
-            { type: 'number', message: '必须为数字值', min: 1, max: 999 }
+            { required: true, message: '请输入客户名称', trigger: 'blur' }
           ]
         },
-
         imageUrl: ''
       }
     },
@@ -97,22 +75,22 @@
         that.$refs[formName].validate((valid) => {
           if (valid) {
             // 验证通过 
-            that.createSupplier();
+            that.createCustomers();
           } else {
             return false;
           }
         })
       },
 
-      async createSupplier(){
+      async createCustomers(){
         var that = this;
-        await that.$http.post('createSupplier', that.ruleForm);
+        await that.$http.post('createCustomers', that.ruleForm);
         that.$message({
           type: 'success',
           message: '保存成功'
         })
         // 跳转用户列表
-        that.$router.push('/teaSupplier/list')
+        that.$router.push('/cardCustomers/list')
       },
 
       resetForm(formName) {

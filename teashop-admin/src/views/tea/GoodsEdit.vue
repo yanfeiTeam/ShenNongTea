@@ -113,46 +113,59 @@
           </el-form>
 
           <!-- 上传图片面板 -->
-          <el-form v-if="stepsActive == 1" v-bind:model="ruleForm" v-bind:rules="rules" ref="ruleForm" label-width="120px" style="width:96%;" >
-            <el-form-item label="商品主图" prop="image_path">
+          <el-form v-if="stepsActive == 1" label-width="120px" style="width:96%;" >
+            <el-form-item label="商品轮播图">
                 <el-upload
-                  action="https://jsonplaceholder.typicode.com/posts/"
+                  action="javascript:void(0);"
                   list-type="picture-card"
                   accept=".jpeg,.jpg,.png,"
+                  v-bind:class="{disUoloadSty:hideUploadEdit}"
                   v-bind:limit="5"
-                  v-bind:on-preview="handlePictureCardPreview"
-                  v-bind:on-remove="handleRemove">
+                  v-bind:file-list="uploadForm.fileLists"
+                  v-bind:auto-upload="false"
+                  v-bind:on-change="changeGoodsPicture"
+                  v-bind:on-preview="previewGoodsPicture"
+                  v-bind:on-remove="removeGoodsPicture">
                   <i class="el-icon-plus"></i>
                 </el-upload>
-                <el-dialog :visible.sync="dialogVisible">
-                  <img width="100%" :src="dialogImageUrl" alt="">
-                </el-dialog>
+                <!-- 大图预览框 -->
+            　　<el-dialog v-bind:visible.sync="dialogImgVisible" title="图片">
+                　　<img width="100%" v-bind:src="dialogImageUrl" alt="主图">
+            　　</el-dialog>
             </el-form-item>
-            <el-form-item label="商品介绍图" prop="video">
+            <el-form-item label="商品介绍图">
                 <el-upload
                   class="upload-demo"
                   drag
-                  action="https://jsonplaceholder.typicode.com/posts/"
+                  action="javascript:void(0)"
                   accept=".jpeg,.jpg,.png,"
+                  v-bind:limit="1"
+                  v-bind:auto-upload="false"
+                  v-bind:on-change="changeIntroduceImg"
                   multiple>
                   <i class="el-icon-upload"></i>
                   <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                  <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
             </el-form-item>
-            <el-form-item label="规格介绍图" prop="video">
+            <el-form-item label="规格介绍图">
                 <el-upload
                   class="upload-demo"
                   drag
-                  action="https://jsonplaceholder.typicode.com/posts/"
+                  action="javascript:void(0)"
                   accept=".jpeg,.jpg,.png,"
+                  v-bind:limit="1"
+                  v-bind:auto-upload="false"
+                  v-bind:on-change="changeSpecificationsImg"
                   multiple>
                   <i class="el-icon-upload"></i>
                   <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+                  <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
                 </el-upload>
             </el-form-item>
             <el-form-item>
-                <el-button type="primary" v-on:click="submitForm('ruleForm')">保存，下一步</el-button>
-                <el-button type="morenbt" v-on:click="resetForm('ruleForm')">重置</el-button>
+                <el-button type="primary" v-on:click="submitUploadImgForm()">保存,下一步</el-button>
+                <el-button type="morenbt" v-on:click="stepsActive = 0">返回,上一步</el-button>
             </el-form-item>
           </el-form>
         </el-tab-pane>
@@ -183,9 +196,9 @@
           freight: null,
           introduce:'',
           specifications:'',
-          state: '0',
-          sele_state: '0',
-          recommend: '1',
+          state: 0,
+          sele_state: 0,
+          recommend: 1,
           sort: 1
         },
         rules: {
@@ -239,7 +252,17 @@
         stepsActive: 0,
 
         dialogImageUrl: '',
-        dialogVisible: false
+        dialogVisible: false,
+
+        // 上传模块Form
+        uploadForm: {
+          fileLists: [],
+          introduceImg:'',
+          specificationsImg:'',
+        },
+        
+        dialogImgVisible: false,//大图预览框
+        hideUploadEdit:false,//图片个数设置 超过5张为true
       }
     },
 
@@ -264,15 +287,19 @@
         that.$router.go(-1);
       }, 
 
+      /** 第一步：商品基本信息 */
+
       async submitForm(formName) {
         const that = this;
         that.$refs[formName].validate(async (valid) => {
           if (valid) {
             // 验证通过 
             if(that.$data.ruleForm.id){
-              await that.$http.post('updateTeaGoods', that.ruleForm);
+              const { data } = await that.$http.post('updateTeaGoods', that.ruleForm);
+              that.$data.commodityNew = data.data;
             }else{
-              await that.$http.post('createTeaGoods', that.ruleForm);
+              const { data } = await that.$http.post('createTeaGoods', that.ruleForm);
+              that.$data.commodityNew = data.data;
             }
             that.$message({
               type: 'success',
@@ -296,7 +323,6 @@
         }
         that.$data.ruleForm = data.data
       },
-
 
       resetForm(formName) {
         const that = this;
@@ -322,64 +348,167 @@
         return isJPG && isLt2M;
       },
 
-      // 表单提交 上传轮播图
-      async submitGoodsImgForm(formName) {
-        const that = this;
-        that.$refs[formName].validate(async (valid) => {
-          if (valid) {
-            // 验证通过 
-            if(that.$data.ruleForm.id){
-              await that.$http.post('updateTeaGoodsImg', that.ruleForm);
-            }else{
-              await that.$http.post('createTeaGoodsImg', that.ruleForm);
-            }
+      /**  第二步：商品上传图片     */
+      async submitUploadImgForm(){
+        var that = this
+        // 上传轮播图
+        if(that.uploadForm.fileLists.length >= 1){
+          that.uploadForm.fileLists.forEach(async function(item,index){
+            let fd = new FormData()
+            fd.append('file',item.raw)
+            const { data } = await that.$http.post('upload/img', fd);
+            let params = Object.assign({}, {
+                commodityId: that.$data.commodityNew.id,
+                imagePath: data.data.url,
+                sort: index
+            })
+            await that.$http.post('createTeaGoodsImg', params);
             that.$message({
               type: 'success',
-              message: '保存成功'
+              message: '上传成功'
             })
-            // 操作下一步
-            that.$data.stepsActive = 1
-          } else {
-            return false;
+          })
+        }
+        
+        // 上传商品简介图
+        if(that.uploadForm.introduceImg || that.uploadForm.specificationsImg){
+          let introduceData = {data:{data:{url:''}}};
+          if(that.uploadForm.introduceImg){
+            let fd1 = new FormData()
+            fd1.append('file', that.uploadForm.introduceImg)
+            introduceData = await that.$http.post('upload/img', fd1);
           }
-        })
+          let specificationsData = {data:{data:{url:''}}};
+          if(that.uploadForm.specificationsImg){
+            // 上传商品规格图
+            let fd2 = new FormData()
+            fd2.append('file', that.uploadForm.specificationsImg)
+            specificationsData = await that.$http.post('upload/img', fd2);
+          }
+          let params = Object.assign({}, {
+              id: that.$data.commodityNew.id,
+              introduce: introduceData.data.data.url,
+              specifications: specificationsData.data.data.url
+          })
+          await that.$http.post('updateTeaGoods', params);
+          that.$message({
+            type: 'success',
+            message: '上传成功'
+          })
+        }
+        // 操作下一步
+        that.$data.stepsActive = 2
       },
 
-      // 上传 照片墙
-      handleRemove(file, fileList) {
-        console.log(file, fileList);
+      // 验证 商品主图
+      changeGoodsPicture(file, fileList){
+        var that = this;
+        var testmsg = file.name.substring(file.name.lastIndexOf('.')+1)
+        const extension = testmsg === 'jpeg'
+        const extension2 = testmsg === 'jpg'
+        const extension3 = testmsg === 'png'
+        const isLt2M = file.size / 1024 / 1024 < 2
+        if(!isLt2M){
+          that.$message({
+            type: 'warning',
+            message: '文件大小请限制在2M以内'
+          })
+          return
+        }
+        if(!extension && !extension2 && !extension3) {
+          that.$message({
+            message: '上传文件只能是 jpeg、jpg、png格式!',
+            type: 'warning'
+          })
+          return
+        }
+        that.uploadForm.fileLists.push(file)
+        that.hideUploadEdit = that.uploadForm.fileLists.length >= 5
+        return (extension || extension2 || extension3) && isLt2M;
       },
-      handlePictureCardPreview(file) {
-        this.dialogImageUrl = file.url;
-        this.dialogVisible = true;
+      // 验证 商品简介图
+      changeIntroduceImg(file, fileList){
+        var that = this;
+        var testmsg = file.name.substring(file.name.lastIndexOf('.')+1)
+        const extension = testmsg === 'jpeg'
+        const extension2 = testmsg === 'jpg'
+        const extension3 = testmsg === 'png'
+        const isLt2M = file.size / 1024 / 1024 < 2
+        if(!isLt2M){
+          that.$message({
+            type: 'warning',
+            message: '文件大小请限制在2M以内'
+          })
+          return
+        }
+        if(!extension && !extension2 && !extension3) {
+          that.$message({
+            message: '上传文件只能是 jpeg、jpg、png格式!',
+            type: 'warning'
+          })
+          return
+        }
+        that.uploadForm.introduceImg = file.raw
+        return (extension || extension2 || extension3)  && isLt2M;
       },
+      // 验证 商品规格图
+      changeSpecificationsImg(file, fileList){
+        var that = this;
+        var testmsg = file.name.substring(file.name.lastIndexOf('.')+1)
+        const extension = testmsg === 'jpeg'
+        const extension2 = testmsg === 'jpg'
+        const extension3 = testmsg === 'png'
+        const isLt2M = file.size / 1024 / 1024 < 2
+        if(!isLt2M){
+          that.$message({
+            type: 'warning',
+            message: '文件大小请限制在2M以内'
+          })
+          return
+        }
+        if(!extension && !extension2 && !extension3) {
+          that.$message({
+            message: '上传文件只能是 jpeg、jpg、png格式!',
+            type: 'warning'
+          })
+          return
+        }
+        that.uploadForm.specificationsImg = file.raw
+        return (extension || extension2 || extension3) && isLt2M;
+      },
+      // 删除 商品主图
+      removeGoodsPicture(file, fileList) {
+        var that = this
+        that.uploadForm.fileLists = fileList
+        that.hideUploadEdit = that.uploadForm.fileLists.length >= 5
+      },
+      // 预览 商品主图
+      previewGoodsPicture(file) {
+        var that = this
+        that.dialogImageUrl = file.url;
+        that.dialogImgVisible = true;
+      },
+
+      /** 第三步：商品预览 */
+
 
       // 获取茶系数据列表
       async getCategoryList(){
         let params = Object.assign({}, {name:''});
-        const { err, data } = await this.$http.post('getTeaCategoryList', params);
-        if (err) {
-        return false
-        }
-        this.$data.CategoryData = data.data
+        const { data } = await this.$http.post('getTeaCategoryList', params);
+        this.$data.CategoryData = data.data || []
       },
       // 获取品牌数据列表
       async getSupplierList(){
         let params = Object.assign({}, {name:''});
-        const { err, data } = await this.$http.post('getSupplierList', params);
-        if (err) {
-        return false
-        }
-        this.$data.SupplierData = data.data
+        const { data } = await this.$http.post('getSupplierList', params);
+        this.$data.SupplierData = data.data || []
       },
       // 获取茶类数据列表
       async getTeaTypesList(){
         let params = Object.assign({}, {name:''});
-        const { err, data } = await this.$http.post('getTeaTypesList', params);
-        if (err) {
-        return false
-        }
-        this.$data.TypesData = data.data
+        const { data } = await this.$http.post('getTeaTypesList', params);
+        this.$data.TypesData = data.data || []
       },
 
     }
@@ -409,5 +538,10 @@
     width: 178px;
     height: 178px;
     display: block;
+  }
+
+  /* css 图片个数够5张时 上传按钮框隐藏 */
+  .disUoloadSty .el-upload--picture-card{
+      display:none;   /* 上传按钮隐藏 */
   }
 </style>

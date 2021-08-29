@@ -17,6 +17,15 @@ module.exports = app => {
     // 茶分类 路由
     app.use(apiUrl + '/', require('../controllers/teaTypesController'))
 
+
+    // 客户管理 路由
+    app.use(apiUrl + '/', require('../controllers/cardCustomersController'))
+    // 客户卡批次 路由
+    app.use(apiUrl + '/', require('../controllers/cardBatchController'))
+    // 活动管理 路由
+    app.use(apiUrl + '/', require('../controllers/cardActivitiesController'))
+
+
     // 上传图片 路由
     app.use(apiUrl + '/upload/', require('../controllers/uploadController'))
 }
